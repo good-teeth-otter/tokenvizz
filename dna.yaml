@@ -1,0 +1,78 @@
+name: dna
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Core Python & Jupyter
+  - python=3.8
+  - ipykernel
+  - ipython
+  - jupyterlab
+
+  # Science stack
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - biopython
+
+  # Utilities & IDE support
+  - asttokens
+  - backcall
+  - decorator
+  - executing
+  - jedi
+  - parso
+  - prompt-toolkit
+  - stack_data
+  - wcwidth
+
+  # Compression, images, XML, fonts
+  - bzip2
+  - zlib
+  - lz4-c
+  - brotli
+  - libxml2
+  - fontconfig
+  - freetype
+  - libpng
+  - libtiff
+  - jpeg
+  - lerc
+
+  # Networking, databases, security
+  - openssl
+  - sqlite
+  - libsodium
+  - krb5
+  - cyrus-sasl
+  - dbus
+  - psycopg2       # use conda-built psycopg2 instead of pip to get pg_config
+
+  # BLAS & OpenMP (macOS Apple Silicon compatible)
+  - openblas
+  - llvm-openmp
+
+  # Optional: other macOS-specific packages
+  - icu
+
+  # Remove Linux-only: mkl, intel-openmp, libgcc-ng, libgomp, _openmp_mutex, _libgcc_mutex
+
+  # Pip-only packages
+  - pip:
+      - accelerate==0.33.0
+      - flask==3.0.3
+      - huggingface-hub==0.24.6
+      - transformers==4.44.2
+      - pysam==0.22.1
+      - python-igraph==0.11.6
+      - samtools-tool==0.15
+      - networkx==3.1
+      - pyarrow==17.0.0
+      - sqlalchemy==2.0.34
+      - pyyaml==6.0.2
+      - tqdm==4.66.5
+      - pandas==2.0.3
+      - scipy==1.10.1
+      - torch==1.13.1
+      - tokenizers==0.19.1
