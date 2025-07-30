@@ -496,7 +496,7 @@ def main():
         devices=1,
         accelerator=accelerator,
         precision=precision,
-        logger=False,
+        logger=True,
         profiler=profiler,
     )
     if accelerator != 'cpu' and len(original_gpus) > 1:
@@ -695,3 +695,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
