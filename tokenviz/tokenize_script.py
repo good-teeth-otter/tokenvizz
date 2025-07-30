@@ -3,7 +3,7 @@ import torch
 import transformers
 from transformers import AutoTokenizer, AutoModel
 from transformers.models.bert.configuration_bert import BertConfig
-import gc
+#import gc
 import scipy.sparse as sp
 import json
 import pysam
@@ -31,14 +31,21 @@ def clean_sequence(seq):
 
 
 def clean_gpu():
+    """
     torch.cuda.empty_cache()
     gc.collect()
+    """
+    try:
+        torch.mps.empty_cache()
+    except AttributeError:
+        pass
 
 def print_system_info():
     logging.info('====================================')
     logging.info(f'torch.__version__: {torch.__version__}')
-    logging.info(f'torch.version.cuda: {torch.version.cuda}')
-    logging.info(f'torch.cuda.is_available(): {torch.cuda.is_available()}')
+    #logging.info(f'torch.version.cuda: {torch.version.cuda}')
+    #logging.info(f'torch.cuda.is_available(): {torch.cuda.is_available()}')
+    logging.info(f'MPS available: {torch.backends.mps.is_available()}')
     logging.info(f'transformers.__version__: {transformers.__version__}')
     logging.info(f"Number of GPUs available: {torch.cuda.device_count()}")
     logging.info(f"cuDNN version: {torch.backends.cudnn.version()}")
@@ -322,7 +329,9 @@ class DNABertModule(pl.LightningModule):
             # Stack input IDs to create a batch
             input_ids = torch.stack(input_ids_list).to(self.device)
 
-            with torch.cuda.amp.autocast():
+            autocast_ctx = torch.autocast if hasattr(torch, "autocast") else torch.cuda.amp.autocast
+            #with torch.cuda.amp.autocast():
+            with autocast_ctx(device_type="mps", dtype=torch.float16):
                 attention_weights, _ = run_model(self.model.to(self.device), input_ids)
 
             # Reorganize attention_weights per sample
@@ -468,11 +477,26 @@ def main():
         profiler = None  # No profiler
 
     # Initialize the Trainer
+    """
     trainer = pl.Trainer(
         devices=len(original_gpus),
         accelerator='gpu',
         strategy='ddp',  # Distributed Data Parallel
         precision=16,
+        logger=False,
+        profiler=profiler,
+    )
+    """
+    use_cpu = (len(original_gpus) == 1 and original_gpus[0] == 0)
+    has_mps = torch.backends.mps.is_available()
+    accel = 'cpu' if use_cpu else ('mps' if has_mps else 'gpu')
+    strat = None if accel == 'cpu' else 'ddp'
+    prec = 32 if accel == 'cpu' else 16
+    trainer = pl.Trainer(
+        devices=1,
+        accelerator=accel,
+        strategy=strat,
+        precision=prec,
         logger=False,
         profiler=profiler,
     )
