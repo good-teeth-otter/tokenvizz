@@ -487,22 +487,22 @@ def main():
         profiler=profiler,
     )
     """
+    from pytorch_lightning.accelerators import MPSAccelerator
     use_cpu = (len(original_gpus) == 1 and original_gpus[0] == 0)
-    has_mps = torch.backends.mps.is_available()
-    accel = 'cpu' if use_cpu else ('mps' if has_mps else 'gpu')
-    prec = 32 if accel == 'cpu' else 16
-    if accel in ('mps', 'gpu') and len(original_gpus) > 1:
-        strat = 'ddp'
-    else:
-        strat=None
-    trainer = pl.Trainer(
+    has_pl_mps = MPSAccelerator.is_available()
+    accelerator = 'cpu' if use_cpu else ('mps' if has_pl_mps else 'cpu')
+    precision = 32 if accelerator == 'cpu' else 16
+    trainer_kwargs = dict(
         devices=1,
-        accelerator=accel,
-        strategy=strat,
-        precision=prec,
+        accelerator=accelerator,
+        precision=precision,
         logger=False,
         profiler=profiler,
     )
+    if accelerator != 'cpu' and len(original_gpus) > 1:
+        trainer_kwargs['strategy'] = 'ddp'
+    trainer = pl.Trainer(**trainer_kwargs)
+
 
     # Run the prediction
     outputs = trainer.predict(model, datamodule=data_module)
