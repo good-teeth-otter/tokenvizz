@@ -490,8 +490,11 @@ def main():
     use_cpu = (len(original_gpus) == 1 and original_gpus[0] == 0)
     has_mps = torch.backends.mps.is_available()
     accel = 'cpu' if use_cpu else ('mps' if has_mps else 'gpu')
-    strat = None if accel == 'cpu' else 'ddp'
     prec = 32 if accel == 'cpu' else 16
+    if accel in ('mps', 'gpu') and len(original_gpus) > 1:
+        strat = 'ddp'
+    else:
+        strat=None
     trainer = pl.Trainer(
         devices=1,
         accelerator=accel,
