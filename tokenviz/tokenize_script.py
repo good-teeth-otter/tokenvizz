@@ -299,7 +299,7 @@ class DNABertModule(pl.LightningModule):
         self.model_name = model_name
         self.kmer_size = kmer_size
         self.threshold = threshold
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True, use_fast=True)
         self.config = BertConfig.from_pretrained(model_name, return_dict=True)
         self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True, config=self.config)
         self.max_seq_length = self.model.config.max_position_embeddings if self.model.config.max_position_embeddings else 512
@@ -695,6 +695,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
