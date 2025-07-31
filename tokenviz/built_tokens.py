@@ -25,3 +25,4 @@ cfg["tokenizer_class"] = "PreTrainedTokenizerFast"
 with open(cfg_path, "w") as f:
     json.dump(cfg, f, indent=2)
 print(f"Updated tokenizer_config.json at {cfg_path}")
+
